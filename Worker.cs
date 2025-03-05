@@ -39,7 +39,7 @@ namespace ReverificationWorkerDemo
                     using (SqlCommand cmd = new SqlCommand("MCSVC.GetCustomersDueForReverification", connection))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@Risk_Rating", "High");
+                        cmd.Parameters.AddWithValue("@Risk_Rating", "Highx");
                         cmd.Parameters.AddWithValue("@isReverification", 1);
                         cmd.Parameters.AddWithValue("@isFATCA", 0);
                         cmd.Parameters.AddWithValue("@ReverificationInterval", 1);
