@@ -22,7 +22,8 @@ namespace ReverificationWorkerDemo
                 if (_logger.IsEnabled(LogLevel.Information))
                 {
                     _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                    await GetCustomersDueForRev();
+                    //await GetCustomersDueForRev();
+                    await RestrictCustomerAndNotifyAsync();
                 }
                 await Task.Delay(1000000, stoppingToken);
             }
@@ -40,7 +41,7 @@ namespace ReverificationWorkerDemo
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@Risk_Rating", "No Risk");
-                        cmd.Parameters.AddWithValue("@isReverification", 0);
+                        cmd.Parameters.AddWithValue("@isReverification", 1);
                         cmd.Parameters.AddWithValue("@isFATCA", 1);
                         cmd.Parameters.AddWithValue("@ReverificationInterval", 1);
 
@@ -96,7 +97,6 @@ namespace ReverificationWorkerDemo
                 Console.WriteLine($"  Notification Counter: {customer.NotificationCounter}");
                 Console.WriteLine($"  Reverification Due Date: {customer.ReverificationDueDate:yyyy-MM-dd}");
                 Console.WriteLine($"  FATCA Due Date: {customer.FatcaDueDate:yyyy-MM-dd}");
-                Console.WriteLine($"  Next Notification Date: {customer.NextNotificationDate:yyyy-MM-dd}");
                 Console.WriteLine($"  Risk Rating: {customer.RiskRating}");
                 Console.WriteLine($"  Is Locked: {customer.IsLocked}");
                 Console.WriteLine($"  Is Mandatory Review Screen: {customer.IsMandatoryRevScreen}");
@@ -105,6 +105,85 @@ namespace ReverificationWorkerDemo
             }
 
             Console.WriteLine("===============================================");
+        }
+
+        public async Task<int> RestrictCustomerAndNotifyAsync()
+        {
+            List<Customer> customers = new List<Customer>
+    {
+        new Customer
+        {
+            RIM_No = "15992111",
+            FatcaLastRevDate = DateTime.Parse("2025-03-04 00:00:00.000"),
+            NotificationCounter = 0,
+            ReverificationDueDate = null,
+            FatcaDueDate = null,
+            OnboardingDate = DateTime.Parse("2025-03-04 00:00:00.000"),
+            RiskRating = "High",
+            DateUpdated = DateTime.Now,
+            LastRevDate = DateTime.Parse("2025-03-04 00:00:00.000"),
+            LastFatcaDate = DateTime.Parse("2025-03-04 00:00:00.000"),
+            IsMandatoryRevScreen = false,
+            IsLocked = false
+        }
+        ,
+        new Customer
+        {
+            RIM_No = "15992100        ",
+            FatcaLastRevDate = DateTime.Parse("2025-03-05 00:00:00.000"),
+            NotificationCounter = 1,
+            ReverificationDueDate = DateTime.Parse("2025-03-04 00:00:00.000"),
+            FatcaDueDate = DateTime.Parse("2025-03-04 00:00:00.000"),
+            OnboardingDate = DateTime.Parse("2025-03-05 00:00:00.000"),
+            RiskRating = "High",
+            DateUpdated = DateTime.Now,
+            LastRevDate = DateTime.Parse("2025-03-04 00:00:00.000"),
+            LastFatcaDate = DateTime.Parse("2025-03-05 00:00:00.000"),
+            IsMandatoryRevScreen = true,
+            IsLocked = true
+        }
+    };
+
+            int affectedRows = 0;
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("ReverificationDbConnection")!))
+                {
+                    await connection.OpenAsync();
+
+                    foreach (var customer in customers)
+                    {
+                        using (SqlCommand cmd = new SqlCommand("MCSVC.UpdateOrInsertCustomerRevInfo", connection))
+                        {
+                            cmd.CommandType = CommandType.StoredProcedure;
+
+                            cmd.Parameters.AddWithValue("@Rim_No", customer.RIM_No);
+                            cmd.Parameters.AddWithValue("@FatcaLastRevDate", customer.FatcaLastRevDate ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@NotificationCounter", customer.NotificationCounter ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@ReverificationDueDate", customer.ReverificationDueDate ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@FatcaDueDate", customer.FatcaDueDate ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@OnboardingDate", customer.OnboardingDate);
+                            cmd.Parameters.AddWithValue("@RiskRating", customer.RiskRating);
+                            cmd.Parameters.AddWithValue("@DateUpdated", customer.DateUpdated ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@LastRevDate", customer.LastRevDate ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@LastFatcaDate", customer.LastFatcaDate ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@isMandatoryRevScreen", customer.IsMandatoryRevScreen);
+                            cmd.Parameters.AddWithValue("@isLocked", customer.IsLocked);
+
+                            affectedRows += await cmd.ExecuteNonQueryAsync();
+                        }
+                    }
+                }
+
+                Console.WriteLine($"Successfully processed {affectedRows} customers.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating customers: {ex.Message}");
+            }
+
+            return affectedRows; 
         }
     }
 }
