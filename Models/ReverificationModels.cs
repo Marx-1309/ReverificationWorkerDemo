@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,10 +28,10 @@ namespace ReverificationWorkerDemo.Models
 
         public class Customer
         {
-            public Guid CustomerID { get; set; }
+            public Guid CustomerID { get; set; } = new Guid();
             public string? DigitalID { get; set; }
             public DateTime? FatcaLastRevDate { get; set; }
-            public string RIM_No { get; set; } 
+            public string? RIM_No { get; set; } 
             public int? NotificationCounter { get; set; } = 0;
             public DateTime? ReverificationDueDate { get; set; }
             public DateTime? FatcaDueDate { get; set; }

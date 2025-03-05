@@ -25,7 +25,7 @@ namespace ReverificationWorkerDemo
                     //await GetCustomersDueForRev();
                     await RestrictCustomerAndNotifyAsync();
                 }
-                await Task.Delay(1000000, stoppingToken);
+                await Task.Delay(1000, stoppingToken);
             }
         }
 
@@ -63,8 +63,8 @@ namespace ReverificationWorkerDemo
                                     OnboardingDate = rdr.GetDateTime(rdr.GetOrdinal("OnboardingDate"))
                                 });
                             }
-
-                             DisplayCustomers(customers);
+                            _logger.LogInformation($"{customers.Count} ,Customer's fetched and due for reverificaion.." , DateTimeOffset.Now);
+                            DisplayCustomers(customers);
                         }
                     }
                 }
@@ -113,6 +113,7 @@ namespace ReverificationWorkerDemo
     {
         new Customer
         {
+            DigitalID = new Guid().ToString(),
             RIM_No = "15992111",
             FatcaLastRevDate = DateTime.Parse("2025-03-04 00:00:00.000"),
             NotificationCounter = 0,
@@ -129,7 +130,8 @@ namespace ReverificationWorkerDemo
         ,
         new Customer
         {
-            RIM_No = "15992100        ",
+            DigitalID = new Guid().ToString(),
+            RIM_No = $"{DateTime.Now.ToString("MMddyyyyHHmmss")}",
             FatcaLastRevDate = DateTime.Parse("2025-03-05 00:00:00.000"),
             NotificationCounter = 1,
             ReverificationDueDate = DateTime.Parse("2025-03-04 00:00:00.000"),
@@ -158,6 +160,7 @@ namespace ReverificationWorkerDemo
                         {
                             cmd.CommandType = CommandType.StoredProcedure;
 
+                            cmd.Parameters.AddWithValue("@DigitalID", $"{DateTime.Now.ToString("MMddyyyyHHmmss")}");//To be REMOVED...
                             cmd.Parameters.AddWithValue("@Rim_No", customer.RIM_No);
                             cmd.Parameters.AddWithValue("@FatcaLastRevDate", customer.FatcaLastRevDate ?? (object)DBNull.Value);
                             cmd.Parameters.AddWithValue("@NotificationCounter", customer.NotificationCounter ?? (object)DBNull.Value);
@@ -176,10 +179,12 @@ namespace ReverificationWorkerDemo
                     }
                 }
 
+                _logger.LogInformation($"Successfully processed {affectedRows} customers.", DateTimeOffset.Now);
                 Console.WriteLine($"Successfully processed {affectedRows} customers.");
             }
             catch (Exception ex)
             {
+                _logger.LogInformation($"Error updating customers: {ex.Message}", DateTimeOffset.Now);
                 Console.WriteLine($"Error updating customers: {ex.Message}");
             }
 
