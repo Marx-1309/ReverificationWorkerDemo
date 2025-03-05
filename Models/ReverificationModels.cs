@@ -34,7 +34,6 @@ namespace ReverificationWorkerDemo.Models
             public int? NotificationCounter { get; set; } = 0;
             public DateTime? ReverificationDueDate { get; set; }
             public DateTime? FatcaDueDate { get; set; }
-            public DateTime? NextNotificationDate { get; set; }
             public DateTime? OnboardingDate { get; set; }
             public string? RiskRating { get; set; }
             public DateTime? DateCreated { get; set; } = DateTime.Now;

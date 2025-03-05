@@ -39,9 +39,9 @@ namespace ReverificationWorkerDemo
                     using (SqlCommand cmd = new SqlCommand("MCSVC.GetCustomersDueForReverification", connection))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@Risk_Rating", "Highx");
-                        cmd.Parameters.AddWithValue("@isReverification", 1);
-                        cmd.Parameters.AddWithValue("@isFATCA", 0);
+                        cmd.Parameters.AddWithValue("@Risk_Rating", "No Risk");
+                        cmd.Parameters.AddWithValue("@isReverification", 0);
+                        cmd.Parameters.AddWithValue("@isFATCA", 1);
                         cmd.Parameters.AddWithValue("@ReverificationInterval", 1);
 
                         await connection.OpenAsync();
@@ -56,7 +56,6 @@ namespace ReverificationWorkerDemo
                                     NotificationCounter = rdr["NotificationCounter"] as int?,
                                     ReverificationDueDate = rdr["ReverificationDueDate"] as DateTime?,
                                     FatcaDueDate = rdr["FatcaDueDate"] as DateTime?,
-                                    NextNotificationDate = rdr["NextNotificationDate"] as DateTime?,
                                     RiskRating = rdr.GetString(rdr.GetOrdinal("RiskRating")),
                                     IsLocked = rdr.GetBoolean(rdr.GetOrdinal("IsLocked")),
                                     IsMandatoryRevScreen = rdr.GetBoolean(rdr.GetOrdinal("IsMandatoryRevScreen")),
