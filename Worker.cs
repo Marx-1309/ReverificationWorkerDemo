@@ -23,7 +23,7 @@ namespace ReverificationWorkerDemo
                 {
                     _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                     //await GetCustomersDueForRev();
-                    await RestrictCustomerAndNotifyAsync();
+                    await UpsertCustomerRevInfo();
                 }
                 await Task.Delay(10000, stoppingToken);
             }
@@ -107,7 +107,7 @@ namespace ReverificationWorkerDemo
             Console.WriteLine("===============================================");
         }
 
-        public async Task<int> RestrictCustomerAndNotifyAsync()
+        public async Task<int> UpsertCustomerRevInfo()
         {
             List<Customer> customers = new List<Customer>
     {
