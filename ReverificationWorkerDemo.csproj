@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Worker">
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -18,5 +18,17 @@
 	  <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
 	  <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
 	  <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+	  <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.0" />
+	  <PackageReference Include="Google.Protobuf" Version="3.30.0" />
+	  <PackageReference Include="Grpc.Tools" Version="2.54.0" PrivateAssets="All" />
+	  <PackageReference Include="Grpc.AspNetCore" Version="2.54.0" />
+
   </ItemGroup>
+
+	<ItemGroup>
+		<Protobuf Include="Protos/reverification.proto" GrpcServices="Server" CompileAs="ProtoBuf" />
+	</ItemGroup>
+
+
+
 </Project>

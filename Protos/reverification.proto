@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+option csharp_namespace = "ReverificationWorkerDemo.Protos";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+service ReverificationService {
+
+  rpc GetCustomersDueForRev (GetCustomersRequest) returns (CustomerList);
+  rpc UpsertCustomerRevInfo (CustomerList) returns (UpsertResponse);
+}
+
+message GetCustomersRequest {
+  string risk_rating = 1;
+  bool is_reverification = 2;
+  bool is_fatca = 3;
+  int32 reverification_interval = 4;
+}
+
+message Customer {
+  string digital_id = 1;
+  string rim_no = 2;
+  optional int32 notification_counter = 3;
+  optional string reverification_due_date = 4;
+  optional string fatca_due_date = 5;
+  string risk_rating = 6;
+  bool is_locked = 7;
+  bool is_mandatory_rev_screen = 8;
+  string onboarding_date = 9;
+  optional string fatca_last_rev_date = 10;
+  optional string last_rev_date = 11;
+  optional string last_fatca_date = 12;
+  optional string date_updated = 13;
+}
+
+message CustomerList {
+  repeated Customer customers = 1;
+}
+
+message UpsertResponse {
+  int32 affected_rows = 1;
+  string message = 2;
+}
